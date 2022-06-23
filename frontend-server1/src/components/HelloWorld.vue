@@ -105,7 +105,7 @@
         </v-dialog>
       </v-toolbar>
     </template>
-    <template v-slot:item.actions="{ item }">
+    <template v-slot:[`item.actions`]="{ item }">
       <v-icon
         small
         class="mr-2"
@@ -132,114 +132,116 @@
 </template>
 
 <script>
-/* eslint-disable */
 import axios from 'axios';
 
-  export default {
-    data: () => ({
-      dialog: false,
-      dialogDelete: false,
-      headers: [
-        {
-          text: 'ID',
-          align: 'start',
-          sortable: false,
-          value: 'id',
-        },
-        { text: 'Name', value: 'name' },
-        { text: 'E-mail', value: 'email' },
-        { text: 'Actions', value: 'actions', sortable: false },
-      ],
-      desserts: [],
-      editedIndex: -1,
-      editedItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
+export default {
+  name: 'HelloWorld',
+  data: () => ({
+    dialog: false,
+    dialogDelete: false,
+    headers: [
+      {
+        text: 'ID',
+        align: 'start',
+        sortable: false,
+        value: 'id',
       },
-      defaultItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
-      },
-    }),
+      { text: 'Name', value: 'name' },
+      { text: 'E-mail', value: 'email' },
+      { text: 'Actions', value: 'actions', sortable: false },
+    ],
+    desserts: [],
+    editedIndex: -1,
+    editedItem: {
+      name: '',
+      calories: 0,
+      fat: 0,
+      carbs: 0,
+      protein: 0,
+    },
+    defaultItem: {
+      name: '',
+      calories: 0,
+      fat: 0,
+      carbs: 0,
+      protein: 0,
+    },
+  }),
 
-    computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
+  computed: {
+    formTitle() {
+      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+    },
+  },
+
+  watch: {
+    dialog(val) {
+      val || this.close();
+    },
+    dialogDelete(val) {
+      val || this.closeDelete();
+    },
+  },
+
+  created() {
+    this.initialize();
+  },
+
+  methods: {
+    initialize() {
+      axios.get('http://localhost:3000/users/list').then((res) => {
+        const items = res.data;
+        this.desserts = items;
+      });
     },
 
-    watch: {
-      dialog (val) {
-        val || this.close()
-      },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
+    editItem(item) {
+      this.editedIndex = this.desserts.indexOf(item);
+      console.log(this.editedIndex);
+      this.editedItem = { ...item };
+      this.dialog = true;
     },
 
-    created () {
-      this.initialize()
+    deleteItem(item) {
+      this.editedIndex = this.desserts.indexOf(item);
+      this.editedItem = { ...item };
+      axios.post('http://localhost:3000/users/delete', { id: this.editedItem.id });
+      this.dialogDelete = true;
     },
 
-    methods: {
-      initialize () {
-        axios.get('http://localhost:3000/users/list').then((res)=> {
-          const items = res.data;
-          this.desserts = items
+    deleteItemConfirm() {
+      this.desserts.splice(this.editedIndex, 1);
+      this.closeDelete();
+    },
+
+    close() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editedItem = { ...this.defaultItem };
+        this.editedIndex = -1;
+      });
+    },
+
+    closeDelete() {
+      this.dialogDelete = false;
+      this.$nextTick(() => {
+        this.editedItem = { ...this.defaultItem };
+        this.editedIndex = -1;
+      });
+    },
+
+    save() {
+      if (this.editedIndex > -1) {
+        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        axios.post('http://localhost:3000/users/update', { id: this.editedItem.id, name: this.editedItem.name, email: this.editedItem.email });
+      } else {
+        this.desserts.push(this.editedItem);
+        axios.post('http://localhost:3000/users/register', {
+          id: this.editedItem.id, name: this.editedItem.name, email: this.editedItem.email, password: '123456',
         });
-      },
-
-      editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
-        console.log(this.editedIndex);
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
-      },
-
-      deleteItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        axios.post('http://localhost:3000/users/delete', { id: this.editedItem.id })
-        this.dialogDelete = true
-      },
-
-      deleteItemConfirm () {
-        this.desserts.splice(this.editedIndex, 1)
-        this.closeDelete()
-      },
-
-      close () {
-        this.dialog = false
-        this.$nextTick(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        })
-      },
-
-      closeDelete () {
-        this.dialogDelete = false
-        this.$nextTick(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        })
-      },
-
-      save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
-          axios.post('http://localhost:3000/users/update', { id: this.editedItem.id, name: this.editedItem.name, email: this.editedItem.email})
-        } else {
-          this.desserts.push(this.editedItem)
-           axios.post('http://localhost:3000/users/register', { id: this.editedItem.id, name: this.editedItem.name, email: this.editedItem.email, password: "123456" })
-        }
-        this.close()
-      },
+      }
+      this.close();
     },
-  }
+  },
+};
 </script>
