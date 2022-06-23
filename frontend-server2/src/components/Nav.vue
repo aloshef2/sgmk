@@ -1,24 +1,25 @@
 <template>
-    <v-tabs
-    class="d-flex align-center mb-6"
-    flat
-    height="100"
-    >
-      <v-tab>
-        <router-link to="/" >Главная</router-link>
-      </v-tab>
-      <v-tab>
-        <router-link to="/login" >Войти</router-link>
-      </v-tab>
-      <v-tab>
-        <router-link to="/register" >Регистрация</router-link>
-      </v-tab>
-    </v-tabs>
+  <header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <div class="container-fluid">
+        <router-link to="/" class="navbar-brand">Домашняя</router-link>
+        <div>
+          <ul class="navbar-nav me-auto mb-2 mb-md-0">
+            <li class="nav-item">
+              <router-link to="/login" class="nav-link" >Войти</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link to="/register" class="nav-link" >Регистрация</router-link>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
 </template>
 
-<script lang="ts">
+<script>
 export default {
-  // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Nav'
+    name: 'Nav'
 }
 </script>

@@ -1,4 +1,4 @@
-# dablyt
+# vue-auth
 
 ## Project setup
 ```
